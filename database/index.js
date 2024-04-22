@@ -5,8 +5,7 @@ dotenv.config();
 set("strictQuery", false); 
   
 async function connectDatabase() {
-  try {  
-    console.log(process.env.MONGO_URI); 
+  try {   
     await connect(process.env.MONGO_URI);
     console.log("Database connected successfully");
   } catch (error) {
