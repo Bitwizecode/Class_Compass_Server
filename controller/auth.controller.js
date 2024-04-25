@@ -19,7 +19,7 @@ const register = async (req, res) => {
     classes: [],
     password: encryptedPassword,
   });
-
+  console.log("object");
   res.status(200).send({ message: "Teacher added successfully", status: true });
 };
 
