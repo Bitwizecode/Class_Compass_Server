@@ -9,9 +9,10 @@ const register = async (req, res) => {
   });
   console.log(body, isTeacher);
   if (isTeacher) {
-    return res
-      .status(409)
-      .send("Teacher already exists with given email or number.");
+    return res.status(409).send({
+      message: "Teacher already exists with given email or number.",
+      status: false,
+    });
   }
   const encryptedPassword = await bcrypt.hash(body?.password, 10);
   const teacher = await Teacher.create({
@@ -20,7 +21,7 @@ const register = async (req, res) => {
     password: encryptedPassword,
   });
 
-  res.status(200).send({ message: "Teacher added successfully" });
+  res.status(200).send({ message: "Teacher added successfully", status: true });
 };
 
 const login = async (req, res) => {
