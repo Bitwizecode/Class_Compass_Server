@@ -18,7 +18,7 @@ const teacherSchema = new Schema(
       type: [{}],
       required: true,
     },
-    mobile_no: {
+    phone: {
       type: String,
       required: true,
     },
@@ -47,6 +47,10 @@ const teacherSchema = new Schema(
       required: true,
     },
     state: {
+      type: String,
+      required: true,
+    },
+    district: {
       type: String,
       required: true,
     },
