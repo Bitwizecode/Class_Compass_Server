@@ -4,9 +4,11 @@ const jwt = require("jsonwebtoken");
 
 const register = async (req, res) => {
   const body = req.body;
+
   const isTeacher = await Teacher.findOne({
-    $or: [{ email: body?.email }, { mobile_no: body?.mobile_no }],
+    $or: [{ email: body?.email }, { phone: body?.phone }],
   });
+  console.log(isTeacher);
   if (isTeacher) {
     return res.status(409).send({
       message: "Teacher already exists with given email or number.",
@@ -28,7 +30,7 @@ const login = async (req, res) => {
 
   // Check if the user exists by email or number
   const isTeacher = await Teacher.findOne({
-    $or: [{ email: loginInput }, { number: loginInput }],
+    $or: [{ email: loginInput }, { phone: loginInput }],
   });
 
   if (!isTeacher) {
