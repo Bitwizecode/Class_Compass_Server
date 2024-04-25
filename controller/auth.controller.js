@@ -7,7 +7,6 @@ const register = async (req, res) => {
   const isTeacher = await Teacher.findOne({
     $or: [{ email: body?.email }, { mobile_no: body?.mobile_no }],
   });
-  console.log(body, isTeacher);
   if (isTeacher) {
     return res.status(409).send({
       message: "Teacher already exists with given email or number.",
