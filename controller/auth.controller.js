@@ -34,15 +34,19 @@ const login = async (req, res) => {
   });
 
   if (!isTeacher) {
-    return res
-      .status(404)
-      .send("User does not exist with the given email or number.");
+    return res.status(404).send({
+      message: "User does not exist with the given email or number.",
+      status: false,
+    });
   }
 
   // Compare passwords
   const isPasswordValid = await bcrypt.compare(password, isTeacher.password);
   if (!isPasswordValid) {
-    return res.status(404).send("Invalid password.");
+    return res.status(404).send({
+      message: "Invalid username or password",
+      status: false,
+    });
   }
   delete isTeacher.password;
   const token = jwt.sign(
