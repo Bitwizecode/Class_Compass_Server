@@ -1,6 +1,6 @@
 const { Schema, model } = require("mongoose");
 
-const teacherSchema = new Schema(
+const studentSchema = new Schema(
   {
     school_id: {
       type: String,
@@ -18,12 +18,24 @@ const teacherSchema = new Schema(
       type: String,
       required: true,
     },
+    parent_detail: {
+      type: [{}],
+      required: true,
+    },
     aadhar_no: {
       type: String,
       required: true,
     },
-    classes: {
-      type: [{}],
+    religion: {
+      type: String,
+      required: false,
+    },
+    cast: {
+      type: String,
+      required: false,
+    },
+    class: {
+      type: String,
       required: true,
     },
     phone: {
@@ -73,6 +85,6 @@ const teacherSchema = new Schema(
   }
 );
 
-const Teacher = model("Teacher", teacherSchema);
+const Teacher = model("Teacher", studentSchema);
 
 module.exports = Teacher;

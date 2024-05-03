@@ -1,6 +1,19 @@
 const Teacher = require("../model/teacher.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
+const { generateOtp } = require("../config/common_service");
+const store = { otp: "" };
+
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
+  auth: {
+    user: "bitwizecode@gmail.com",
+    pass: "byxr ruqb apol vzan",
+  },
+});
 
 const register = async (req, res) => {
   const body = req.body;
@@ -60,4 +73,31 @@ const login = async (req, res) => {
   res.status(200).send({ message: "Login successful", token });
 };
 
-module.exports = { register, login };
+const forgotPasswordSendOtp = async (req, res) => {
+  try {
+    const otp = await generateOtp();
+    store.otp = otp;
+    const info = await transporter.sendMail({
+      from: "bitwizecode@gmail.com", // sender address
+      to: "guptaraj9146@gmail.com", // list of receivers
+      subject: "Message from your pappa", // Subject line
+      text: "Here is your otp", // plain text body
+      html: `<p>Your OTP is : <b>${otp}</b></p>`, // html body
+    });
+    console.log("OTP :", otp);
+    res.status(200).send({ message: "OTP sent successful" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ message: "Something went wrong!" });
+  }
+};
+
+const verifyOtp = async (req, res) => {
+  const { otp } = req.body;
+  if (otp == store.otp) {
+    res.status(200).send({ message: "OTP verified successfully!" });
+    return;
+  }
+  res.status(500).send({ message: "Wrong OTP !" });
+};
+module.exports = { register, login, forgotPasswordSendOtp, verifyOtp };
