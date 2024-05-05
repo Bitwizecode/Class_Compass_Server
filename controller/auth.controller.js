@@ -122,4 +122,10 @@ const changePassword = async (req, res) => {
   }
 };
 
-module.exports = { register, login, forgotPasswordSendOtp, verifyOtp };
+module.exports = {
+  register,
+  login,
+  forgotPasswordSendOtp,
+  verifyOtp,
+  changePassword,
+};
