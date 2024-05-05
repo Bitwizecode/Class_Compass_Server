@@ -74,12 +74,13 @@ const login = async (req, res) => {
 };
 
 const forgotPasswordSendOtp = async (req, res) => {
+  const { inputData } = req.body();
   try {
     const otp = await generateOtp();
     store.otp = otp;
     const info = await transporter.sendMail({
       from: "bitwizecode@gmail.com", // sender address
-      to: "guptaraj9146@gmail.com", // list of receivers
+      to: inputData, // list of receivers
       subject: "Message from your pappa", // Subject line
       text: "Here is your otp", // plain text body
       html: `<p>Your OTP is : <b>${otp}</b></p>`, // html body
