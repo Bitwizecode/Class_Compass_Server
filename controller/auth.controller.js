@@ -74,7 +74,7 @@ const login = async (req, res) => {
 };
 
 const forgotPasswordSendOtp = async (req, res) => {
-  const { inputData } = req.body();
+  const { inputData } = req.body;
   try {
     const otp = await generateOtp();
     store.otp = otp;
