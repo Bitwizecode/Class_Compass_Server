@@ -94,11 +94,32 @@ const forgotPasswordSendOtp = async (req, res) => {
 };
 
 const verifyOtp = async (req, res) => {
-  const { otp } = req.body;
-  if (otp == store.otp) {
-    res.status(200).send({ message: "OTP verified successfully!" });
-    return;
+  try {
+    const { otp } = req.body;
+    if (otp == store.otp) {
+      res.status(200).send({ message: "OTP verified successfully!" });
+      return;
+    }
+    res.status(500).send({ message: "Wrong OTP !" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ message: "Something went wrong!" });
   }
-  res.status(500).send({ message: "Wrong OTP !" });
 };
+
+const changePassword = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const encryptedPassword = await bcrypt.hash(password, 10);
+    const updatedUser = await Teacher.findOneAndUpdate(
+      { email },
+      { $set: { password: encryptedPassword } }
+    );
+    res.status(200).send({ message: "Password changed successfully!" });
+  } catch (error) {
+    console.log(error);
+    res.status(200).send({ message: "Password changed successfully!" });
+  }
+};
+
 module.exports = { register, login, forgotPasswordSendOtp, verifyOtp };
