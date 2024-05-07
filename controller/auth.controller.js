@@ -17,11 +17,15 @@ const transporter = nodemailer.createTransport({
 
 const register = async (req, res) => {
   const body = req.body;
-
   const isTeacher = await Teacher.findOne({
     $or: [{ email: body?.email }, { phone: body?.phone }],
   });
-  console.log(isTeacher);
+  console.log(
+    isTeacher?.email === body?.email,
+    isTeacher?.phone === body?.phone
+  );
+  console.log(isTeacher?.email, body?.email);
+  console.log(isTeacher?.phone, body?.phone);
   if (isTeacher) {
     return res.status(409).send({
       message: "Teacher already exists with given email or number.",

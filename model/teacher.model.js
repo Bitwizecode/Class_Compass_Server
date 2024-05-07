@@ -4,7 +4,7 @@ const teacherSchema = new Schema(
   {
     school_id: {
       type: String,
-      required: true,
+      required: false,
     },
     first_name: {
       type: String,
@@ -16,15 +16,15 @@ const teacherSchema = new Schema(
     },
     blood_group: {
       type: String,
-      required: true,
+      required: false,
     },
     aadhar_no: {
       type: String,
-      required: true,
+      required: false,
     },
     classes: {
       type: [{}],
-      required: true,
+      required: false,
     },
     phone: {
       type: String,
