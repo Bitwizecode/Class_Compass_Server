@@ -2,8 +2,12 @@ const Teacher = require("../model/teacher.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
-const { generateOtp } = require("../config/common_service");
-const store = { otp: "" };
+const {
+  generateOtp,
+  otpHTML,
+  isOtpExpired,
+} = require("../config/common_service");
+const fs = require("fs");
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
@@ -15,17 +19,26 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+async function sendEmail(inputData, otp, res) {
+  try {
+    const info = await transporter.sendMail({
+      from: '"OTP Verification" <bitwizecode@gmail.com>',
+      to: inputData,
+      subject: "Reset Password OTP : " + otp,
+      text: "Here is your otp : " + otp,
+      html: otpHTML(otp),
+    });
+    return;
+  } catch (error) {
+    console.log("Error while sending email:", error);
+    return;
+  }
+}
 const register = async (req, res) => {
   const body = req.body;
   const isTeacher = await Teacher.findOne({
     $or: [{ email: body?.email }, { phone: body?.phone }],
   });
-  console.log(
-    isTeacher?.email === body?.email,
-    isTeacher?.phone === body?.phone
-  );
-  console.log(isTeacher?.email, body?.email);
-  console.log(isTeacher?.phone, body?.phone);
   if (isTeacher) {
     return res.status(409).send({
       message: "Teacher already exists with given email or number.",
@@ -38,7 +51,6 @@ const register = async (req, res) => {
     classes: [],
     password: encryptedPassword,
   });
-  console.log("object");
   res.status(200).send({ message: "Teacher added successfully", status: true });
 };
 
@@ -80,31 +92,74 @@ const login = async (req, res) => {
 const forgotPasswordSendOtp = async (req, res) => {
   const { inputData } = req.body;
   try {
-    const otp = await generateOtp();
-    store.otp = otp;
-    const info = await transporter.sendMail({
-      from: "bitwizecode@gmail.com", // sender address
-      to: inputData, // list of receivers
-      subject: "Message from your pappa", // Subject line
-      text: "Here is your otp", // plain text body
-      html: `<p>Your OTP is : <b>${otp}</b></p>`, // html body
+    const otp = generateOtp();
+    const OTP_DETAILS = {
+      otp: otp,
+      email: inputData,
+      sent_at: new Date(),
+    };
+
+    try {
+      await sendEmail(inputData, otp);
+    } catch (error) {
+      console.log("Error while sending email:", error);
+      return res.status(500).send({ message: "Something went wrong!" });
+    }
+
+    fs.readFile("./otp.json", "utf8", (err, data) => {
+      if (err) {
+        console.log("Error while reading the file:", err);
+        return res.status(500).send({ message: "Something went wrong!" });
+      }
+      try {
+        const file = JSON.parse(data);
+
+        fs.writeFile(
+          "./otp.json",
+          JSON.stringify({ ...file, [inputData]: OTP_DETAILS }),
+          (err) => {
+            if (err) {
+              console.log("Error while writing to the file:", err);
+              return res.status(500).send({ message: "Something went wrong!" });
+            }
+          }
+        );
+      } catch (error) {
+        console.log("Error while parsing JSON data:", error);
+        return res.status(500).send({ message: "Something went wrong!" });
+      }
     });
-    console.log("OTP :", otp);
-    res.status(200).send({ message: "OTP sent successful" });
+
+    return res.status(200).send({ message: "OTP sent successfully" });
   } catch (error) {
-    console.log(error);
-    res.status(500).send({ message: "Something went wrong!" });
+    console.log("Error:", error);
+    return res.status(500).send({ message: "Something went wrong!" });
   }
 };
 
 const verifyOtp = async (req, res) => {
   try {
-    const { otp } = req.body;
-    if (otp == store.otp) {
-      res.status(200).send({ message: "OTP verified successfully!" });
-      return;
-    }
-    res.status(500).send({ message: "Wrong OTP !" });
+    const { otp, email } = req.body;
+
+    let file;
+    fs.readFile("./otp.json", "utf8", (err, data) => {
+      if (err) {
+        console.log("Error while reading the file:", err);
+        return res.status(500).send({ message: "Something went wrong!" });
+      }
+      file = JSON.parse(data);
+
+      const storedOtp = file?.[email];
+      if (storedOtp.otp !== otp) {
+        return res.status(500).send({ message: "Wrong OTP !" });
+      }
+
+      if (isOtpExpired(new Date(storedOtp?.sent_at))) {
+        return res.status(500).send({ message: "Your OTP got expired" });
+      }
+
+      return res.status(200).send({ message: "OTP verified successfully!" });
+    });
   } catch (error) {
     console.log(error);
     res.status(500).send({ message: "Something went wrong!" });
