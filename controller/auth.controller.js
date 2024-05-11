@@ -150,6 +150,7 @@ const verifyOtp = async (req, res) => {
       file = JSON.parse(data);
 
       const storedOtp = file?.[email];
+      console.log(storedOtp?.otp, otp);
       if (storedOtp.otp + "" !== "" + otp) {
         console.log("OTP is wrong");
         res.status(500).send({ message: "Wrong OTP !" });
