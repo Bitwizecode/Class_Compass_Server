@@ -105,7 +105,7 @@ const forgotPasswordSendOtp = async (req, res) => {
       return res.status(500).send({ message: "Something went wrong!" });
     }
 
-    fs.readFile("./tmp/otp.json", "utf8", (err, data) => {
+    fs.readFile("/tmp/otp.json", "utf8", (err, data) => {
       if (err) {
         console.log("Error while reading the file:", err);
         return res.status(500).send({ message: "Something went wrong!" });
@@ -114,7 +114,7 @@ const forgotPasswordSendOtp = async (req, res) => {
         const file = JSON.parse(data);
 
         fs.writeFile(
-          "./tmp/otp.json",
+          "/tmp/otp.json",
           JSON.stringify({ ...file, [inputData]: OTP_DETAILS }),
           (err) => {
             if (err) {
@@ -141,7 +141,7 @@ const verifyOtp = async (req, res) => {
     const { otp, email } = req.body;
     console.log(email, otp);
     let file;
-    fs.readFile("./tmp/otp.json", "utf8", (err, data) => {
+    fs.readFile("/tmp/otp.json", "utf8", (err, data) => {
       if (err) {
         console.log("Error while reading the file:", err);
         return res.status(500).send({ message: "Something went wrong!" });
