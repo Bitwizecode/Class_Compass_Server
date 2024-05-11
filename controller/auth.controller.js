@@ -140,7 +140,7 @@ const forgotPasswordSendOtp = async (req, res) => {
 const verifyOtp = async (req, res) => {
   try {
     const { otp, email } = req.body;
-
+    console.log(email, otp);
     let file;
     fs.readFile("./otp.json", "utf8", (err, data) => {
       if (err) {
@@ -151,14 +151,19 @@ const verifyOtp = async (req, res) => {
 
       const storedOtp = file?.[email];
       if (storedOtp.otp !== otp) {
-        return res.status(500).send({ message: "Wrong OTP !" });
+        console.log("OTP is wrong");
+        res.status(500).send({ message: "Wrong OTP !" });
+        return;
       }
 
       if (isOtpExpired(new Date(storedOtp?.sent_at))) {
-        return res.status(500).send({ message: "Your OTP got expired" });
+        console.log("OTP is expired");
+        res.status(500).send({ message: "Your OTP got expired" });
+        return;
       }
-
-      return res.status(200).send({ message: "OTP verified successfully!" });
+      console.log("OTP is good");
+      res.status(200).send({ message: "OTP verified successfully!" });
+      return;
     });
   } catch (error) {
     console.log(error);
