@@ -134,7 +134,7 @@ const verifyOtp = async (req, res) => {
       return; 
     }
     if (existOTP.otp !== otp) {
-      res.status(500).send({ message: "Wrong OTP !" }); 
+      res.status(500).send({ message: "Wrong OTP !" });  
       return;
     }
     if (isOtpExpired(new Date(existOTP?.updatedAt))) {
