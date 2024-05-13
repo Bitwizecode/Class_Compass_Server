@@ -108,7 +108,6 @@ function isOtpExpired(sentDate) {
   const currentTime = new Date();
   const timeDifference = currentTime.getTime() - sentDate.getTime();
   const minutesDifference = timeDifference / (1000 * 60); // Convert milliseconds to minutes
-
   // Check if the difference is greater than 5 minutes
   return minutesDifference > 5;
 }
