@@ -9,6 +9,10 @@ const {
 } = require("../config/common_service");
 const fs = require("fs");
 const OTP = require("../model/otp.model");
+const WHITELISTED_ADMIN = require("../model/whitelist/whitelisted-admin.model");
+const WHITELISTED_TEACHER = require("../model/whitelist/whitelisted-teacher.model");
+const WHITELISTED_STUDENT = require("../model/whitelist/whitelisted-student.model");
+const WHITELISTED_DRIVER = require("../model/whitelist/whitelisted-driver.model");
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 465,
@@ -131,10 +135,10 @@ const verifyOtp = async (req, res) => {
 
     if (!existOTP) {
       res.status(500).send({ message: "Please request the OTP first" });
-      return; 
+      return;
     }
     if (existOTP.otp !== otp) {
-      res.status(500).send({ message: "Wrong OTP !" });  
+      res.status(500).send({ message: "Wrong OTP !" });
       return;
     }
     if (isOtpExpired(new Date(existOTP?.updatedAt))) {
@@ -146,7 +150,7 @@ const verifyOtp = async (req, res) => {
     return;
   } catch (error) {
     console.log(err);
-    res.status(200).send({ message: "OTP verified successfully!" });
+    res.status(500).send({ message: "OTP verified successfully!" });
     return;
   }
 };
@@ -162,6 +166,68 @@ const changePassword = async (req, res) => {
     res.status(200).send({ message: "Password changed successfully!" });
   } catch (error) {
     console.log(error);
+    res.status(500).send({ message: "Something went wrong!" });
+  }
+};
+
+const verifyWhitelist = async (req, res) => {
+  try {
+    const {
+      email,
+      account_type,
+    } = req.body;
+    let isWhitelisted = false;
+    if (account_type == "teacher") {
+      isWhitelisted = await WHITELISTED_TEACHER.findOne({ email: email });
+    } else if (account_type == "admin") {
+      isWhitelisted = await WHITELISTED_ADMIN.findOne({ email: email });
+    } else if (account_type == "student") {
+      isWhitelisted = await WHITELISTED_STUDENT.findOne({ email: email });
+    } else if (account_type == "driver") {
+      isWhitelisted = await WHITELISTED_DRIVER.findOne({ email: email });
+    }
+
+    if (!isWhitelisted) {
+      res
+        .status(404)
+        .send({
+          message:
+            "The email is not whitelisted by the school, please contact school",
+        });
+      return;
+    }
+
+    res.status(200).send({ message: "" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ message: "Something went wrong!" });
+  }
+};
+
+const addWhitelist = async (req, res) => {
+  try {
+    const {
+      email,
+      name,
+      class_std,
+      bus_no,
+      trust_name,
+      school_name,
+      account_type,
+    } = req.body;
+    let whitelisted = null;
+    if (account_type == "teacher") {
+      whitelisted = await WHITELISTED_TEACHER.create({ email, class_std,  name, school_name  });
+    } else if (account_type == "admin") {
+      whitelisted = await WHITELISTED_ADMIN.create({ email, trust_name, school_name});
+    } else if (account_type == "student") {
+      whitelisted = await WHITELISTED_STUDENT.create({ email, name, school_name, class_std  });
+    } else if (account_type == "driver") {
+      whitelisted = await WHITELISTED_DRIVER.create({ email, bus_no, name, school_name });
+    }
+    res.status(200).send({ message: "Email whitelisted successfully!", user_details: whitelisted });
+  } catch (error) {
+    console.log(error);
     res.status(200).send({ message: "Password changed successfully!" });
   }
 };
@@ -172,4 +238,6 @@ module.exports = {
   forgotPasswordSendOtp,
   verifyOtp,
   changePassword,
+  verifyWhitelist,
+  addWhitelist
 };
