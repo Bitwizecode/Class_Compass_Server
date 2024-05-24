@@ -212,18 +212,18 @@ const addWhitelist = async (req, res) => {
       class_std,
       bus_no,
       trust_name,
-      school_name,
+      school_id,
       account_type,
     } = req.body;
     let whitelisted = null;
     if (account_type == "teacher") {
-      whitelisted = await WHITELISTED_TEACHER.create({ email, class_std,  name, school_name  });
+      whitelisted = await WHITELISTED_TEACHER.create({ email, class_std,  name, school_id  });
     } else if (account_type == "admin") {
-      whitelisted = await WHITELISTED_ADMIN.create({ email, trust_name, school_name});
+      whitelisted = await WHITELISTED_ADMIN.create({ email, trust_name, school_id});
     } else if (account_type == "student") {
-      whitelisted = await WHITELISTED_STUDENT.create({ email, name, school_name, class_std  });
+      whitelisted = await WHITELISTED_STUDENT.create({ email, name, school_id, class_std  });
     } else if (account_type == "driver") {
-      whitelisted = await WHITELISTED_DRIVER.create({ email, bus_no, name, school_name });
+      whitelisted = await WHITELISTED_DRIVER.create({ email, bus_no, name, school_id });
     }
     res.status(200).send({ message: "Email whitelisted successfully!", user_details: whitelisted });
   } catch (error) {

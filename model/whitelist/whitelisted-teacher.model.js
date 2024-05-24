@@ -14,7 +14,7 @@ const whitelistedTeacher = new Schema(
       type: String,
       required: true,
     },
-    school_name: {
+    school_id: {
       type: String,
       required: true,
     },
