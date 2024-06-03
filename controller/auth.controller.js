@@ -84,9 +84,7 @@ const login = async (req, res) => {
   delete isTeacher.password;
   const token = jwt.sign(
     {
-      first_name: isTeacher.first_name,
-      last_name: isTeacher.last_name,
-      email: isTeacher.email,
+      ...isTeacher,
     },
     "compassclass"
   );
@@ -172,10 +170,7 @@ const changePassword = async (req, res) => {
 
 const verifyWhitelist = async (req, res) => {
   try {
-    const {
-      email,
-      account_type,
-    } = req.body;
+    const { email, account_type } = req.body;
     let isWhitelisted = false;
     if (account_type == "teacher") {
       isWhitelisted = await WHITELISTED_TEACHER.findOne({ email: email });
@@ -188,16 +183,14 @@ const verifyWhitelist = async (req, res) => {
     }
 
     if (!isWhitelisted) {
-      res
-        .status(404)
-        .send({
-          message:
-            "The email is not whitelisted by the school, please contact school",
-        });
+      res.status(404).send({
+        message:
+          "The email is not whitelisted by the school, please contact school",
+      });
       return;
     }
 
-    res.status(200).send({ message: "" });
+    res.status(200).send({ message: "the given email is valid" });
   } catch (error) {
     console.log(error);
     res.status(500).send({ message: "Something went wrong!" });
@@ -215,17 +208,47 @@ const addWhitelist = async (req, res) => {
       school_id,
       account_type,
     } = req.body;
+
     let whitelisted = null;
     if (account_type == "teacher") {
-      whitelisted = await WHITELISTED_TEACHER.create({ email, class_std,  name, school_id  });
+      whitelisted = await WHITELISTED_TEACHER.create({
+        email,
+        class_std,
+        name,
+        school_id,
+      });
     } else if (account_type == "admin") {
-      whitelisted = await WHITELISTED_ADMIN.create({ email, trust_name, school_id});
+      whitelisted = await WHITELISTED_ADMIN.create({
+        email,
+        trust_name,
+        school_id,
+      });
     } else if (account_type == "student") {
-      whitelisted = await WHITELISTED_STUDENT.create({ email, name, school_id, class_std  });
+      whitelisted = await WHITELISTED_STUDENT.create({
+        email,
+        name,
+        school_id,
+        class_std,
+      });
     } else if (account_type == "driver") {
-      whitelisted = await WHITELISTED_DRIVER.create({ email, bus_no, name, school_id });
+      whitelisted = await WHITELISTED_DRIVER.create({
+        email,
+        bus_no,
+        name,
+        school_id,
+      });
     }
-    res.status(200).send({ message: "Email whitelisted successfully!", user_details: whitelisted });
+
+    if (!whitelisted) {
+      res.status(404).send({
+        message: "Something went wrong whil",
+      });
+      return;
+    }
+    res.status(200).send({
+      message: "Email whitelisted successfully!",
+      user_details: whitelisted,
+    });
   } catch (error) {
     console.log(error);
     res.status(200).send({ message: "Password changed successfully!" });
@@ -239,5 +262,5 @@ module.exports = {
   verifyOtp,
   changePassword,
   verifyWhitelist,
-  addWhitelist
+  addWhitelist,
 };
