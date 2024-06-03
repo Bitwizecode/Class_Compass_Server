@@ -82,9 +82,21 @@ const login = async (req, res) => {
     });
   }
   delete isTeacher.password;
+
+  console.log(isTeacher);
   const token = jwt.sign(
     {
-      ...isTeacher,
+      first_name: isTeacher?.first_name,
+      last_name: isTeacher?.last_name,
+      phone: isTeacher?.phone,
+      classes: isTeacher?.classes,
+      email: isTeacher?.email,
+      gender: isTeacher?.gender,
+      address: isTeacher?.address,
+      pin_code: isTeacher?.pin_code,
+      state: isTeacher?.state,
+      district: isTeacher?.district,
+      country: isTeacher?.country,
     },
     "compassclass"
   );
